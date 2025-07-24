@@ -1,4 +1,6 @@
+import os
 import torch
+import matplotlib.pyplot as plt
 
 # set of modelling classes
 
@@ -73,20 +75,23 @@ class ModelData:
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
 
     def train(self, x, y, times, device='cpu'):
-        x_train = x
-        y_train = y
-        epochs = times
+        x_train = x.to(device)
+        y_train = y.to(device)
         self.model.to(device)
+        epochs = times
+        losses = []  # Store loss values for plotting
 
         # Determine print frequency
-        if epochs >= 1000:
+        if epochs >= 10000:
+            print_every = 1000
+        elif epochs >= 1000:
             print_every = 100
         elif epochs >= 500:
             print_every = 50
         else:
             print_every = 25
-        
-        # Training of fit model
+
+        # Training loop
         for epoch in range(epochs):
             self.optimizer.zero_grad()
             prediction = self.model(x_train)
@@ -94,5 +99,19 @@ class ModelData:
             loss.backward()
             self.optimizer.step()
 
+            losses.append(loss.item())
+
             if epoch % print_every == 0:
                 print(f"Epoch {epoch}, Loss: {loss.item():.6f}")
+
+        # Save loss plot
+        model_name = self.model.__class__.__name__
+        os.makedirs('./loss_plots', exist_ok=True)
+
+        fig, ax = plt.subplots()
+        ax.plot(range(epochs), losses, linestyle='-')
+        ax.set_xlabel('Epoch')
+        ax.set_ylabel('Loss')
+        ax.set_title(f'Loss Function for {model_name}')
+        plt.savefig(f'./loss_plots/{model_name}-Loss.pdf')
+        plt.close()
