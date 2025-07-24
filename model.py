@@ -4,20 +4,16 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import torch
 
-# tensor conversion of dataset 
-class Convert(torch.tensor):
-    def __init__(self)
-        
+
 
 # set of modelling classes
 
-'''
-Linear fitting Model predicting optimal parameters for a predefined Epoch:
-    fitting_data: x -> float
-    device = gpu
-'''
-
 class LinearModel(torch.nn.Module):
+    '''
+    Linear fitting Model predicting optimal parameters for a predefined Epoch:
+        fitting_data: x -> float
+        device = gpu
+    '''
     def __init__(self):
         super(LinearModel, self).__init__()
         self.a = torch.nn.Parameter(torch.randn(()))
@@ -56,20 +52,53 @@ class CauchyModel(torch.nn.Module):
     def forward_normalized(self, x, *args):
         return self.gamma / (torch.pi * (pow((x - self.x_0), 2) + pow(self.gamma, 2)))
 
+class SigmoidModel(torch.nn.Module):
+    '''
+    Fit Model for Hysteresis for both directions
+    '''
+    def __init__(self):
+        super(SigmoidModel, self).__init__()
+        self.A = torch.nn.Parameter(torch.randn(()))
+        self.k = torch.nn.Parameter(torch.randn(()))
+        self.x_c = torch.nn.Parameter(torch.randn(()))
+    
+    def forward(self, x, direction):
+        if direction == 'UP':
+            return self.A * torch.tanh(self.k * (x + self.x_c))
+        elif direction == 'DOWN':
+            return self.A * torch.tanh(self.k * (x - self.x_c))
+        else:
+            raise ValueError('Unallowed or No direction defined! \n Please choose UP or DOWN as directional Input')
 
 
 # Defining modelling workflow 
-class ModelData():
-    def __init__(self, model) -> int :
+class ModelData:
+    def __init__(self, model):
         self.model = model
+        self.loss_fn = torch.nn.MSELoss()
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
 
-    def train(self, device) -> int:
+    def train(self, x, y, times, device='cpu'):
+        x_train = x
+        y_train = y
+        epochs = times
+        self.model.to(device)
 
+        # Determine print frequency
+        if epochs >= 1000:
+            print_every = 100
+        elif epochs >= 500:
+            print_every = 50
+        else:
+            print_every = 25
         
+        # Training of fit model
+        for epoch in range(epochs):
+            self.optimizer.zero_grad()
+            prediction = self.model(x_train)
+            loss = self.loss_fn(prediction, y_train)
+            loss.backward()
+            self.optimizer.step()
 
-
-
-
-
-
-    
+            if epoch % print_every == 0:
+                print(f"Epoch {epoch}, Loss: {loss.item():.6f}")
