@@ -1,4 +1,5 @@
 import pandas
+import matplotlib.pyplot as plt
 
 # class for definition of Dataset used with pandas
 class ReadSet:
@@ -31,3 +32,23 @@ class ReadSet:
 
         else:
             raise ValueError(f"Unsupported file type: {filetype}")
+
+# Plot Data does need to be changed to work, in Progress of change
+class PlotData:
+    def __init__(self):
+
+    def forward():
+
+        fig.ax = plt.subplots()
+
+        ax.error() # Experimental Data and Error Data
+        ax.plot(, ls = '--', color = 'red' , label = 'Model data') # Fit from Modelled Data
+        ax.legend()
+        ax.set_xlabel()
+        ax.set_ylabel()
+        ax.set_title()
+
+        plt.savefig()
+        plt.close()
+
+        
