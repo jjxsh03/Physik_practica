@@ -3,12 +3,9 @@ import torch
 import matplotlib.pyplot as plt
 
 # set of modelling classes
-
 class LinearModel(torch.nn.Module):
     '''
-    Linear fitting Model predicting optimal parameters for a predefined Epoch:
-        fitting_data: x -> float
-        device = gpu
+    Linear fitting Model predicting optimal parameters for a predefined Epoch
     '''
     def __init__(self):
         super(LinearModel, self).__init__()
@@ -18,11 +15,10 @@ class LinearModel(torch.nn.Module):
     def forward(self, x) -> float:
         return self.a * x + self.b
 
-
 class ExpModel(torch.nn.Module):
     '''
-    Model for fitting of data with an exponential trend:
-        training epochs: 300 -> 1000
+    Model for fitting of data with an exponential trend as usen in v232 - Temperature sensitive resistance
+        expected training loops are estimated for a range of 300 -> 1000 epochs to minimize the risk of explosion of gradient
     '''
     def __init__(self):
         super(ExpModel, self).__init__()
@@ -34,7 +30,7 @@ class ExpModel(torch.nn.Module):
 
 class CauchyModel(torch.nn.Module):
     '''
-    General Fit for Lorentz/Cauchy Funtion
+    fit model for Lorentz/Cauchy distributed functions as used in v234 for alternating currents
     '''
     def __init__(self):
         super(CauchyModel, self).__init__()
@@ -91,7 +87,10 @@ class ModelData:
         else:
             print_every = 25
 
-        # Training loop
+        '''
+        Definition of data training loop. The used device is the cpu, activation of it is per:
+        " device = torch.device("cuda" if torch.cuda.is_available() else "cpu") "
+        '''
         for epoch in range(epochs):
             self.optimizer.zero_grad()
             prediction = self.model(x_train)
